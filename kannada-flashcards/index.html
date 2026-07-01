@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Kannada Flashcards</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <div class="app">
+    <div class="header">
+      <h1>Kannada Flashcards</h1>
+      <p>Tap the card to flip and see the answer</p>
+    </div>
+
+    <div class="stats">
+      <div class="stat"><span id="known-count">0</span><small>Known</small></div>
+      <div class="stat"><span id="review-count">0</span><small>Review</small></div>
+      <div class="stat"><span id="remaining-count">0</span><small>Left</small></div>
+    </div>
+
+    <div class="progress-bar">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+
+    <p class="card-counter" id="card-counter">Card 1 of 20</p>
+
+    <div class="card-area" id="card-area" onclick="flipCard()">
+      <div class="card-inner" id="card-inner">
+        <div class="card-face card-front">
+          <small>English</small>
+          <h2 id="card-english">Water</h2>
+          <p class="hint">↺ tap to flip</p>
+        </div>
+        <div class="card-face card-back">
+          <small>Kannada</small>
+          <h2 id="card-kannada">ನೀರು</h2>
+          <p id="card-pronoun">Neeru</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-btns">
+      <button class="btn btn-review" onclick="markCard('review')">🔁 Review</button>
+      <button class="btn btn-skip" onclick="nextCard()">⏭ Skip</button>
+      <button class="btn btn-know" onclick="markCard('know')">✅ Know it</button>
+    </div>
+
+    <div class="result-panel" id="result-panel">
+      <div id="result-emoji">🎉</div>
+      <h2 id="result-title">Great job!</h2>
+      <p id="result-sub">You knew 8 out of 10 words.</p>
+      <button onclick="restart()">🔄 Try Again</button>
+    </div>
+  </div>
+
+  <script src="cards.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>
