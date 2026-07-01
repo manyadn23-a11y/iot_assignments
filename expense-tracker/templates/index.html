@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Expense Tracker</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <!-- ── Header ─────────────────────────────── -->
+  <header>
+    <div class="header-inner">
+      <div class="logo">💰 ExpenseTrack</div>
+      <div id="totalBadge" class="total-badge">Total: ₹0.00</div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── Add / Edit Form ────────────────────── -->
+    <section class="card form-card">
+      <h2 id="formTitle">Add Expense</h2>
+      <input type="hidden" id="editId" />
+
+      <div class="form-grid">
+        <div class="field">
+          <label>Title *</label>
+          <input type="text" id="title" placeholder="e.g. Lunch, Netflix…" />
+        </div>
+
+        <div class="field">
+          <label>Amount (₹) *</label>
+          <input type="number" id="amount" placeholder="0.00" min="0.01" step="0.01" />
+        </div>
+
+        <div class="field">
+          <label>Category</label>
+          <select id="category">
+            <option>Food</option>
+            <option>Transport</option>
+            <option>Shopping</option>
+            <option>Health</option>
+            <option>Entertainment</option>
+            <option>Utilities</option>
+            <option>Education</option>
+            <option>Other</option>
+          </select>
+        </div>
+
+        <div class="field">
+          <label>Date *</label>
+          <input type="date" id="date" />
+        </div>
+
+        <div class="field full-width">
+          <label>Note</label>
+          <input type="text" id="note" placeholder="Optional note…" />
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button class="btn-primary" onclick="saveExpense()">Save Expense</button>
+        <button class="btn-ghost" id="cancelBtn" onclick="resetForm()" style="display:none">Cancel</button>
+      </div>
+      <p id="formError" class="error-msg"></p>
+    </section>
+
+    <!-- ── Filters ────────────────────────────── -->
+    <section class="filters">
+      <div class="filter-group">
+        <label>Filter by Month</label>
+        <input type="month" id="filterMonth" onchange="loadExpenses()" />
+      </div>
+      <div class="filter-group">
+        <label>Filter by Category</label>
+        <select id="filterCategory" onchange="loadExpenses()">
+          <option value="All">All Categories</option>
+          <option>Food</option>
+          <option>Transport</option>
+          <option>Shopping</option>
+          <option>Health</option>
+          <option>Entertainment</option>
+          <option>Utilities</option>
+          <option>Education</option>
+          <option>Other</option>
+        </select>
+      </div>
+      <button class="btn-ghost" onclick="clearFilters()">Clear Filters</button>
+    </section>
+
+    <!-- ── Stats Row ──────────────────────────── -->
+    <div class="stats-row" id="statsRow">
+      <div class="stat-card">
+        <span class="stat-label">Total Spent</span>
+        <span class="stat-value" id="statTotal">₹0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Transactions</span>
+        <span class="stat-value" id="statCount">0</span>
+      </div>
+      <div class="stat-card">
+        <span class="stat-label">Top Category</span>
+        <span class="stat-value" id="statTop">—</span>
+      </div>
+    </div>
+
+    <!-- ── Expense List ───────────────────────── -->
+    <section class="card">
+      <h2>Expenses</h2>
+      <div id="expenseList" class="expense-list">
+        <p class="empty-msg">No expenses yet. Add one above!</p>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ── Toast ──────────────────────────────── -->
+  <div id="toast" class="toast"></div>
+
+  <script>
+    const API = "/api/expenses";
+
+    // ── Set today as default date ─────────────────────────────────────────
+    document.getElementById("date").valueAsDate = new Date();
+
+    // ── Category colours ──────────────────────────────────────────────────
+    const CAT_COLOR = {
+      Food: "#f97316", Transport: "#3b82f6", Shopping: "#a855f7",
+      Health: "#22c55e", Entertainment: "#ec4899", Utilities: "#14b8a6",
+      Education: "#f59e0b", Other: "#6b7280",
+    };
+
+    function catBadge(cat) {
+      const color = CAT_COLOR[cat] || "#6b7280";
+      return `<span class="cat-badge" style="background:${color}22;color:${color}">${cat}</span>`;
+    }
+
+    // ── Load & render expenses ────────────────────────────────────────────
+    async function loadExpenses() {
+      const month    = document.getElementById("filterMonth").value;
+      const category = document.getElementById("filterCategory").value;
+
+      let url = API + "?";
+      if (month)    url += `month=${month}&`;
+      if (category) url += `category=${category}`;
+
+      const res  = await fetch(url);
+      const data = await res.json();
+
+      document.getElementById("totalBadge").textContent = `Total: ₹${data.total.toFixed(2)}`;
+      document.getElementById("statTotal").textContent  = `₹${data.total.toFixed(2)}`;
+      document.getElementById("statCount").textContent  = data.count;
+
+      // Top category from summary
+      fetchTopCategory();
+
+      const list = document.getElementById("expenseList");
+      if (!data.expenses.length) {
+        list.innerHTML = `<p class="empty-msg">No expenses match your filters.</p>`;
+        return;
+      }
+
+      list.innerHTML = data.expenses.map(e => `
+        <div class="expense-item" id="item-${e.id}">
+          <div class="expense-left">
+            <div class="expense-title">${e.title}</div>
+            <div class="expense-meta">
+              ${catBadge(e.category)}
+              <span class="expense-date">📅 ${e.date}</span>
+              ${e.note ? `<span class="expense-note">📝 ${e.note}</span>` : ""}
+            </div>
+          </div>
+          <div class="expense-right">
+            <div class="expense-amount">₹${e.amount.toFixed(2)}</div>
+            <div class="expense-actions">
+              <button class="btn-icon edit"   onclick="editExpense(${e.id})">✏️</button>
+              <button class="btn-icon delete" onclick="deleteExpense(${e.id})">🗑️</button>
+            </div>
+          </div>
+        </div>
+      `).join("");
+    }
+
+    async function fetchTopCategory() {
+      const res  = await fetch("/api/summary");
+      const data = await res.json();
+      if (!Object.keys(data).length) { document.getElementById("statTop").textContent = "—"; return; }
+      const top  = Object.entries(data).sort((a, b) => b[1] - a[1])[0][0];
+      document.getElementById("statTop").textContent = top;
+    }
+
+    // ── Save (add or update) ──────────────────────────────────────────────
+    async function saveExpense() {
+      const id       = document.getElementById("editId").value;
+      const title    = document.getElementById("title").value.trim();
+      const amount   = parseFloat(document.getElementById("amount").value);
+      const category = document.getElementById("category").value;
+      const date     = document.getElementById("date").value;
+      const note     = document.getElementById("note").value.trim();
+      const errEl    = document.getElementById("formError");
+
+      if (!title)      { errEl.textContent = "Title is required.";           return; }
+      if (!amount || amount <= 0) { errEl.textContent = "Enter a valid amount."; return; }
+      if (!date)       { errEl.textContent = "Date is required.";            return; }
+      errEl.textContent = "";
+
+      const payload = { title, amount, category, date, note };
+      const url     = id ? `${API}/${id}` : API;
+      const method  = id ? "PUT" : "POST";
+
+      const res = await fetch(url, {
+        method,
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        showToast(id ? "Expense updated!" : "Expense added!");
+        resetForm();
+        loadExpenses();
+      } else {
+        const err = await res.json();
+        errEl.textContent = err.error || "Something went wrong.";
+      }
+    }
+
+    // ── Edit ─────────────────────────────────────────────────────────────
+    async function editExpense(id) {
+      const res  = await fetch(API);
+      const data = await res.json();
+      const e    = data.expenses.find(x => x.id === id);
+      if (!e) return;
+
+      document.getElementById("editId").value      = e.id;
+      document.getElementById("title").value       = e.title;
+      document.getElementById("amount").value      = e.amount;
+      document.getElementById("category").value    = e.category;
+      document.getElementById("date").value        = e.date;
+      document.getElementById("note").value        = e.note;
+      document.getElementById("formTitle").textContent = "Edit Expense";
+      document.getElementById("cancelBtn").style.display = "inline-block";
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+
+    // ── Delete ────────────────────────────────────────────────────────────
+    async function deleteExpense(id) {
+      if (!confirm("Delete this expense?")) return;
+      await fetch(`${API}/${id}`, { method: "DELETE" });
+      showToast("Expense deleted.");
+      loadExpenses();
+    }
+
+    // ── Helpers ───────────────────────────────────────────────────────────
+    function resetForm() {
+      document.getElementById("editId").value       = "";
+      document.getElementById("title").value        = "";
+      document.getElementById("amount").value       = "";
+      document.getElementById("category").value     = "Food";
+      document.getElementById("date").valueAsDate   = new Date();
+      document.getElementById("note").value         = "";
+      document.getElementById("formTitle").textContent = "Add Expense";
+      document.getElementById("cancelBtn").style.display = "none";
+      document.getElementById("formError").textContent  = "";
+    }
+
+    function clearFilters() {
+      document.getElementById("filterMonth").value    = "";
+      document.getElementById("filterCategory").value = "All";
+      loadExpenses();
+    }
+
+    function showToast(msg) {
+      const t = document.getElementById("toast");
+      t.textContent = msg;
+      t.classList.add("show");
+      setTimeout(() => t.classList.remove("show"), 2800);
+    }
+
+    // ── Init ──────────────────────────────────────────────────────────────
+    loadExpenses();
+  </script>
+</body>
+</html>

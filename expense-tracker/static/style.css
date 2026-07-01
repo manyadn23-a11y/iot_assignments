@@ -1,0 +1,191 @@
+/* ── Reset & Base ─────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+:root {
+  --bg:        #0f172a;
+  --surface:   #1e293b;
+  --border:    #334155;
+  --accent:    #6366f1;
+  --accent-h:  #818cf8;
+  --text:      #f1f5f9;
+  --muted:     #94a3b8;
+  --danger:    #ef4444;
+  --success:   #22c55e;
+  --radius:    12px;
+  --shadow:    0 4px 24px rgba(0,0,0,0.35);
+}
+
+body {
+  font-family: 'Inter', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.6;
+}
+
+/* ── Header ──────────────────────────────────────────────────────── */
+header {
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  position: sticky; top: 0; z-index: 100;
+}
+.header-inner {
+  max-width: 860px; margin: 0 auto;
+  padding: 14px 20px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+.logo { font-size: 1.2rem; font-weight: 700; letter-spacing: -.3px; }
+
+.total-badge {
+  background: var(--accent);
+  color: #fff;
+  font-size: .85rem; font-weight: 600;
+  padding: 6px 14px; border-radius: 999px;
+}
+
+/* ── Main layout ─────────────────────────────────────────────────── */
+main {
+  max-width: 860px; margin: 0 auto;
+  padding: 28px 20px 60px;
+  display: flex; flex-direction: column; gap: 20px;
+}
+
+/* ── Card ────────────────────────────────────────────────────────── */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  box-shadow: var(--shadow);
+}
+.card h2 {
+  font-size: 1rem; font-weight: 600; margin-bottom: 18px;
+  color: var(--muted); text-transform: uppercase; letter-spacing: .06em;
+}
+
+/* ── Form ────────────────────────────────────────────────────────── */
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+}
+.field { display: flex; flex-direction: column; gap: 6px; }
+.field.full-width { grid-column: 1 / -1; }
+.field label { font-size: .8rem; font-weight: 600; color: var(--muted); }
+
+input, select {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text);
+  padding: 10px 12px;
+  font-size: .92rem;
+  font-family: inherit;
+  outline: none;
+  transition: border-color .2s;
+  width: 100%;
+}
+input:focus, select:focus { border-color: var(--accent); }
+select option { background: var(--surface); }
+
+.form-actions { display: flex; gap: 10px; margin-top: 18px; }
+
+.btn-primary {
+  background: var(--accent); color: #fff;
+  border: none; border-radius: 8px;
+  padding: 11px 22px; font-size: .9rem; font-weight: 600;
+  cursor: pointer; transition: background .2s;
+}
+.btn-primary:hover { background: var(--accent-h); }
+
+.btn-ghost {
+  background: transparent; color: var(--muted);
+  border: 1px solid var(--border); border-radius: 8px;
+  padding: 11px 18px; font-size: .9rem; font-weight: 500;
+  cursor: pointer; transition: color .2s, border-color .2s;
+}
+.btn-ghost:hover { color: var(--text); border-color: var(--text); }
+
+.error-msg { color: var(--danger); font-size: .82rem; margin-top: 8px; min-height: 18px; }
+
+/* ── Filters ─────────────────────────────────────────────────────── */
+.filters {
+  display: flex; align-items: flex-end; gap: 14px; flex-wrap: wrap;
+}
+.filter-group { display: flex; flex-direction: column; gap: 5px; }
+.filter-group label { font-size: .78rem; font-weight: 600; color: var(--muted); }
+.filter-group input,
+.filter-group select { min-width: 180px; }
+
+/* ── Stats row ───────────────────────────────────────────────────── */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px;
+}
+.stat-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 18px 20px;
+  display: flex; flex-direction: column; gap: 4px;
+}
+.stat-label { font-size: .75rem; color: var(--muted); font-weight: 600; text-transform: uppercase; letter-spacing: .05em; }
+.stat-value { font-size: 1.5rem; font-weight: 700; }
+
+/* ── Expense list ────────────────────────────────────────────────── */
+.expense-list { display: flex; flex-direction: column; gap: 10px; }
+
+.expense-item {
+  display: flex; align-items: center; justify-content: space-between;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 14px 16px;
+  transition: border-color .2s;
+}
+.expense-item:hover { border-color: var(--accent); }
+
+.expense-left { flex: 1; min-width: 0; }
+.expense-title { font-weight: 600; font-size: .95rem; margin-bottom: 6px; }
+.expense-meta { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
+
+.cat-badge {
+  font-size: .72rem; font-weight: 700;
+  padding: 3px 9px; border-radius: 999px;
+  letter-spacing: .03em;
+}
+.expense-date, .expense-note { font-size: .78rem; color: var(--muted); }
+
+.expense-right { display: flex; flex-direction: column; align-items: flex-end; gap: 6px; margin-left: 16px; }
+.expense-amount { font-size: 1.05rem; font-weight: 700; color: var(--accent-h); }
+
+.expense-actions { display: flex; gap: 6px; }
+.btn-icon {
+  background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 4px 8px;
+  cursor: pointer; font-size: .85rem;
+  transition: border-color .15s, background .15s;
+}
+.btn-icon:hover { background: var(--border); }
+
+.empty-msg { color: var(--muted); text-align: center; padding: 30px 0; font-size: .9rem; }
+
+/* ── Toast ───────────────────────────────────────────────────────── */
+.toast {
+  position: fixed; bottom: 28px; left: 50%; transform: translateX(-50%) translateY(20px);
+  background: var(--success); color: #fff;
+  padding: 10px 22px; border-radius: 999px;
+  font-size: .88rem; font-weight: 600;
+  opacity: 0; pointer-events: none;
+  transition: opacity .3s, transform .3s;
+  z-index: 999;
+}
+.toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+/* ── Responsive ──────────────────────────────────────────────────── */
+@media (max-width: 600px) {
+  .form-grid    { grid-template-columns: 1fr; }
+  .stats-row    { grid-template-columns: 1fr 1fr; }
+  .filters      { flex-direction: column; }
+  .filter-group input,
+  .filter-group select { min-width: 100%; }
+}
